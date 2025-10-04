@@ -10,6 +10,10 @@ const SpriteAnimator = forwardRef((props, ref) => {
     hurt: {
       src: "enemy_hurt_sheet.png",
       frameCount: 12
+    },
+    dying: {
+      src: "enemy_dying_sheet.png",
+      frameCount: 12
     }
   }
   const [frame, setFrame] = useState(0);
