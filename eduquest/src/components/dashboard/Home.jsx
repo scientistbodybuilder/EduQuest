@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import Header from '../Header'
 
 const Home = () => {
     return(
@@ -9,4 +10,10 @@ const Home = () => {
 }
 
 
-export default Home
+const HomeExport = () => {
+    return(<div className='w-full h-full flex flex-col items-center justify-start'>
+        <Header />
+        <Home />
+    </div>)
+}
+export default HomeExport
