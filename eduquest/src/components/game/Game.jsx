@@ -75,13 +75,11 @@ const Game = () => {
         } else {
             console.log("That is incorrect")
             setPlayerHealth(Math.max(playerHealth - attackPoints,0))
+            handleAction('attack')
             console.log('Player health: ',playerHealth)
         }
     }
 
-    const updateAnimation = () => {
-
-    }
 
     useEffect(() => {
         if (playerHealth == 0) {
@@ -92,6 +90,7 @@ const Game = () => {
     useEffect(() => {
         if (enemyHealth == 0) {
             console.log("Player has won")
+            handleAction('dying')
         }
     },[enemyHealth])
 
@@ -112,7 +111,7 @@ const Game = () => {
             </div>
 
             <div className='h-auto w-11/12 flex items-center justify-center'>
-                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={8}/>
+                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12}/>
             </div>
 
             <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gray-300 flex items-center justify-between border'>

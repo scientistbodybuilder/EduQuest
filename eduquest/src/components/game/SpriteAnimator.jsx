@@ -5,7 +5,7 @@ const SpriteAnimator = forwardRef((props, ref) => {
   const animations = {
     idle: {
       src: "enemy_idle_sheet.png",
-      frameCount: 8
+      frameCount: 8,
     },
     hurt: {
       src: "enemy_hurt_sheet.png",
@@ -13,6 +13,14 @@ const SpriteAnimator = forwardRef((props, ref) => {
     },
     dying: {
       src: "enemy_dying_sheet.png",
+      frameCount: 12
+    },
+    dead: {
+      src: "enemy_dead_sheet.png",
+      frameCount: 1
+    },
+    attack: {
+      src: "enemy_attack_sheet.png",
       frameCount: 12
     }
   }
@@ -45,6 +53,14 @@ const SpriteAnimator = forwardRef((props, ref) => {
         // Finished hurt animation
         setCurrentAnimation("idle");
         return 0; // reset frame
+      }
+      else if (currentAnimation === "attack" && prev === animations[currentAnimation].frameCount - 1) {
+        setCurrentAnimation("idle")
+        return 0
+      }
+      else if (currentAnimation == "dying" && prev === animations[currentAnimation].frameCount - 1) {
+        setCurrentAnimation("dead")
+        return 0;
       }
       
       return next;
