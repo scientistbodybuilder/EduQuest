@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ChoiceCard from './ChoiceCard'
+import SpriteAnimator from './SpriteAnimator'
 
 const Game = () => {
     const [playerHealth, setPlayerHealth] = useState(100)
@@ -7,6 +8,35 @@ const Game = () => {
     const [attackPoints, setAttackPoints] = useState(10)
     const [selected, setSelected] = useState(null)
     const [selectedIndex, setSelectedIndex] = useState(null)
+    const [spriteDim, setSpriteDim] = useState(500)
+    const [size, setSize] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+    });
+    const [gameState, setGameState] = useState('')
+    const [animation, setAnimation] = useState('idle')
+
+    useEffect(() => {
+        const handleResize = () => {
+        setSize({
+            width: window.innerWidth,
+            height: window.innerHeight,
+        });
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    useEffect(() => {
+        if (size.width >= 1290) {
+            setSpriteDim(500)
+        } else if (size.width >= 768) {
+            setSpriteDim(420)
+        } else {
+            setSpriteDim(360)
+        }
+    },[size])
 
     const temp = {
         question: "Which city is University of Toronto located?",
@@ -27,17 +57,30 @@ const Game = () => {
         answer: "A"
     }
 
+    const bRef = useRef();
+
+    const handleAction = (ani) => {
+        if (bRef.current) {
+        bRef.current.updateAnimation(ani); // call function inside B
+        }
+    };
+
     const Answer = () => {
         console.log('Student submitted an answer: ',selected)
         if (selected === temp.answer) {
             console.log("That's correct!")
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
+            handleAction('hurt')
             console.log('Enemy health: ', enemyHealth)
         } else {
             console.log("That is incorrect")
             setPlayerHealth(Math.max(playerHealth - attackPoints,0))
             console.log('Player health: ',playerHealth)
         }
+    }
+
+    const updateAnimation = () => {
+
     }
 
     useEffect(() => {
@@ -54,8 +97,8 @@ const Game = () => {
 
     return(
         <section className='w-full h-full flex flex-col items-center justify-center relative'>
-            <div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-1/2 lg:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
-                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-blue-400 mb-6'>{temp?.question}</h3>
+            <div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-1/2 lg:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-3 py-4 flex flex-col items-center justify-center'>
+                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-center text-blue-400 mb-6'>{temp?.question}</h3>
                 {
                     temp && temp.choices?.map((item,index) => {
                         return <ChoiceCard text={item.text} selected={selectedIndex === index ? true : false} click={() => {
@@ -68,8 +111,8 @@ const Game = () => {
 
             </div>
 
-            <div>
-
+            <div className='h-auto w-11/12 flex items-center justify-center'>
+                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={8}/>
             </div>
 
             <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gray-300 flex items-center justify-between border'>
