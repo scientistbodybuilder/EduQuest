@@ -19,7 +19,8 @@ const ComprehensionForm = (props) => {
     const onSubmit = async () => {
         console.log('User is uploading pdf')
         if (props.file) {
-            
+            const formData = new FormData();
+            formData.append('file', props.file);
         }
     }
 

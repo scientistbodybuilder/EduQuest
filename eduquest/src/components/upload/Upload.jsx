@@ -8,13 +8,17 @@ const Upload = () => {
     const [loading, setLoading] = useState(false)
     const [file, setFile] = useState(null)
     const [openForm, setOpenForm] = useState(false)
+    const [typeError, setTypeError] = useState(false)
 
 
     const handleFileChange = (e) => {
-        if (e.target.files) {
+        if (e.target.files && e.target.files.type == 'application/pdf') {
             console.log(e.target.files)
             setFile(e.target.files[0])
+            setTypeError(false)
             setOpenForm(true)
+        } else if (e.target.files.type != 'application/pdf') {
+            setTypeError(true)
         }
     }
 
@@ -37,7 +41,8 @@ const Upload = () => {
                         <input type='file' onChange={handleFileChange} className='hidden' />
                     </label>
                     <div className='w-full h-auto'>
-                        <p className='text-gray-400 text-lg mt-4'>Maximum upload size: 20 MB</p>
+                        <p className='text-gray-400 text-base md:text-lg mt-4'>Maximum upload size: 20 MB</p>
+                        {typeError && (<p className='text-red-600 text-base md:text-lg mt-2'>File was not of type PDF</p>)}
                     </div>
                 </div>
                 
