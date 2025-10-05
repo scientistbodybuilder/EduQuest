@@ -1,36 +1,32 @@
-import { insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
-import { generateQuestionsFromPdf } from "../services/geminiService.js";
+import { insertResult, getResultsByQuizUuid } from "../services/supabaseService.js";
+import { v4 as uuidv4 } from "uuid";
 
-export const QuestionController = {
-  async generateQuestions(req, res, next) {
+export const ResultController = {
+  async saveResult(req, res, next) {
     try {
-      const { quiz_uuid, comprehension_level } = req.body;
-      const file = req.file;
+      const { quiz_uuid, score, total } = req.body;
+      const user_id = req.user.id;
 
-      if (!file) return res.status(400).json({ error: "PDF required" });
-
-      const base64 = file.buffer.toString("base64");
-      const questions = await generateQuestionsFromPdf(base64, comprehension_level);
-
-      const questionRows = questions.map(q => ({
+      const result_uuid = uuidv4();
+      const result = await insertResult({
+        result_uuid,
         quiz_uuid,
-        question_text: q.question,
-        options: q.options,
-        correct_answer: q.correct,
-      }));
+        user_id,
+        score,
+        total,
+      });
 
-      const savedQuestions = await insertQuestions(questionRows);
-      res.status(201).json({ questions: savedQuestions });
+      res.status(201).json({ result });
     } catch (err) {
       next(err);
     }
   },
 
-  async getQuestions(req, res, next) {
+  async getResults(req, res, next) {
     try {
       const { quiz_uuid } = req.params;
-      const questions = await getQuestionsByQuizUuid(quiz_uuid);
-      res.json({ questions });
+      const results = await getResultsByQuizUuid(quiz_uuid);
+      res.json({ results });
     } catch (err) {
       next(err);
     }
