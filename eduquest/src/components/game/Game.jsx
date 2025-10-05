@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ChoiceCard from './ChoiceCard'
 import SpriteAnimator from './SpriteAnimator'
 import Header from '../Header'
 import bg from '../../assets/backgrounds/game_bg_1.jpg'
+import log from '../../assets/backgrounds/log.png'
 import enemy_hurt from '../../assets/sound/enemy_hurt_sound.mp3'
 import enemy_slash from '../../assets/sound/enemy_slash_sound.mp3'
+import bg_sound from '../../assets/sound/test.mp3'
 import { FaPause } from "react-icons/fa";
 import GameMenu from './GameMenu'
 
 const Game = () => {
+    const navigate = useNavigate()
     const [playerHealth, setPlayerHealth] = useState(100)
     const [enemyHealth, setEnemyHealth] = useState(100)
     const [attackPoints, setAttackPoints] = useState(10)
@@ -19,11 +23,13 @@ const Game = () => {
         width: window.innerWidth,
         height: window.innerHeight,
     });
-    const [openModal, setOpenModal] = useState(false)
+    const [openModal, setOpenModal] = useState(true)
     const [gameState, setGameState] = useState('')
+    const [questions, setQuestions] = useState([])
 
     const audioHurtRef = useRef(null);
     const audioSlashRef = useRef(null)
+    const audioBGRef = useRef(null)
 
     const playHurtSound = () => {
         audioHurtRef.current.play();
@@ -32,6 +38,14 @@ const Game = () => {
     const playSlashSound = () => {
         audioSlashRef.current.play();
     };
+
+    const closeMenu = () => {
+        setOpenModal(false)
+    }
+
+    const endQuiz = () => {
+        navigate("/")
+    }
 
     useEffect(() => {
         const handleResize = () => {
@@ -118,8 +132,9 @@ const Game = () => {
             {/* <audio ref={audioRef} src="" loop /> */}
             <audio ref={audioHurtRef} src={enemy_hurt} />
             <audio ref={audioSlashRef} src={enemy_slash} />
+            {!openModal && <audio ref={audioBGRef} src={bg_sound} autoPlay loop/>}
             <div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-1/2 lg:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
-                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-center text-blue-600 mb-6'>{temp?.question}</h3>
+                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-center text-blue-500 mb-6'>{temp?.question}</h3>
                 {
                     temp && temp.choices?.map((item,index) => {
                         return <ChoiceCard text={item.text} selected={selectedIndex === index ? true : false} click={() => {
@@ -136,29 +151,29 @@ const Game = () => {
                 <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12}/>
             </div>
 
-            <div className='absolute right-2 bottom-16 rounded-md'>
-
+            <div className='absolute right-2 bottom-32 cursor-pointer rounded-md flex items-center justify-center z-10 h-auto xl:px-5 px-4 xl:py-5 py-4' onClick={()=>setOpenModal(true)} style={{backgroundImage: `url(${log})`, backgroundSize: 'cover'}}>
+                <FaPause size={40} color='white'/>
             </div>
 
-            <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gray-300 flex items-center justify-between border'>
+            <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gray-200 flex items-center justify-between border'>
                 <div className='w-1/2 flex flex-col items-start gap-2'>
                     <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Player Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2'>
-                        <div className='absolute h-full w-full bg-red-700 rounded-sm'></div>
-                        <div className={`absolute h-full w-full z-10 bg-green-500 rounded-tl-sm rounded-bl-sm transition-all duration-300 ${playerHealth == 100 ? 'rounded-tr-sm rounded-br-sm' : ''}`} style={{width: `${playerHealth}%`}}></div>
+                        <div className='absolute h-full w-full bg-red-700 rounded-md'></div>
+                        <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tl-md rounded-bl-md transition-all duration-300 ${playerHealth == 100 ? 'rounded-tr-md rounded-br-md' : ''}`} style={{width: `${playerHealth}%`}}></div>
                     </div>
                 </div>
 
                 <div className='w-1/2 flex flex-col items-end gap-2'>
                     <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Enemy Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2 flex justify-end'>
-                        <div className='absolute h-full w-full bg-red-700 rounded-sm'></div>
-                        <div className={`absolute h-full w-full z-10 bg-green-500 rounded-tr-sm rounded-br-sm transition-all duration-300 ${enemyHealth == 100 ? 'rounded-tl-sm rounded-bl-sm' : ''}`} style={{width: `${enemyHealth}%`}}></div>
+                        <div className='absolute h-full w-full bg-red-700 rounded-md'></div>
+                        <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tr-md rounded-br-md transition-all duration-300 ${enemyHealth == 100 ? 'rounded-tl-md rounded-bl-md' : ''}`} style={{width: `${enemyHealth}%`}}></div>
                     </div>
                 </div>
             </div>
 
-            <GameMenu open={openModal} />
+            <GameMenu open={openModal} onClose={closeMenu} endQuiz={endQuiz} />
 
         </section>
     )
