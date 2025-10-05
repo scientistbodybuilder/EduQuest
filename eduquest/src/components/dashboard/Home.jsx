@@ -55,7 +55,7 @@ const Home = () => {
                     {loading ? (<div className='mt-28 h-44 w-44 flex items-center justify-center'><img className='max-h-full' src='/spinner.svg'/></div>)
                     :
                     (
-                        <div className='grid w-full mt-16'>
+                        <div className='grid w-full mt-16 grid-cols-4 gap-4'>
                             {quizzes?.length > 0 && quizzes?.map((item,index) => {
 
                                 return <Card title={item.title} key={index} quizId={item.id} questions={item.questions}/>

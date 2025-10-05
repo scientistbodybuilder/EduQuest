@@ -128,7 +128,7 @@ const Game = () => {
 
     const Answer = () => {
         console.log('Student submitted an answer: ',selected)
-        if (1 == 1) {
+        if (selected == questions[questionIndex].correct_option) {
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
             playHurtSound()
             handleAction('hurt')
