@@ -1,4 +1,4 @@
-import { GeminiClient } from "../clients/geminiClient.js";
+import { geminiClient } from "../config/geminiClient.js";
 
 export async function generateQuestionsFromPdf(base64Pdf, comprehensionLevel) {
     const prompt = `Generate multiple-choice questions from this PDF.

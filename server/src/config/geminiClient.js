@@ -1,6 +1,8 @@
-import { GoogleGenAI } from "@google/genai";
+// import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const geminiClient = new GoogleGenAI({
+
+export const geminiClient = new GoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 

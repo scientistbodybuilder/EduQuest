@@ -1,7 +1,7 @@
-import { SupabaseClient } from "../clients/supabaseClient.js";
+import { supabase } from "../config/supabaseClient.js";
 
 export async function createQuiz(quizRow) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("quizzes")
     .insert([quizRow])
     .select()
@@ -11,7 +11,7 @@ return data;
 }
 
 export async function getQuizByUuid(uuid) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("quizzes")
     .select("*")
     .eq("quiz_uuid", uuid)
@@ -21,7 +21,7 @@ return data;
 }
 
 export async function listUserQuizzes(user_id) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("quizzes")
     .select("*")
     .eq("user_id", user_id)
@@ -31,7 +31,7 @@ return data;
 }
 
 export async function submitQuizResults(resultRow) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("results")
     .insert([resultRow])
     .select()
@@ -41,7 +41,7 @@ return data;
 }
 
 export async function insertQuestions(questionRows) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("questions")
     .insert(questionRows)
     .select();
@@ -50,7 +50,7 @@ return data;
 }
 
 export async function getQuestionsByQuizUuid(quiz_uuid) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("questions")
     .select("*")
     .eq("quiz_uuid", quiz_uuid);
@@ -59,7 +59,7 @@ return data;
 }
 
 export async function insertResult(resultRow) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("results")
     .insert([resultRow])
     .select()
@@ -69,7 +69,7 @@ return data;
 }
 
 export async function getResultsByQuizUuid(quiz_uuid) {
-const { data, error } = await SupabaseClient
+const { data, error } = await supabase
     .from("results")
     .select("*")
     .eq("quiz_uuid", quiz_uuid);

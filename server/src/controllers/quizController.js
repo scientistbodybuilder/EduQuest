@@ -5,20 +5,26 @@ import { generateQuestionsFromPdf } from "../services/geminiService.js";
 
 export const QuizController = {
   async createQuiz(req, res, next) {
+    console.log('reached 1 createQuiz')
     try {
-      const { title, comprehension_level } = req.body;
-      const file = req.file;
-      const userId = req.user.id;
-
-      if (!file) return res.status(400).json({ error: "PDF required" });
+      console.log('req body',req.body)
+      const { title, comprehension_level, userId } = req.body;
+      // const file = pdf;
+      const pdf = req.file;
+      console.log('pdf:', pdf)
+      // const userId = req.user.id;
+      // expects title, comprehension level, file, and userID
+      // console.log('pdf: ',pdf)
+      if (!pdf) return res.status(400).json({ error: "PDF required" });
 
       const quizObj = new Quiz({ user_id: userId, title, comprehension_level });
 
       const quiz = await createQuiz(quizObj);
 
-      const base64 = file.buffer.toString("base64");
+      const base64 = pdf.buffer.toString("base64");
+      console.log('reached 2 quiz')
       const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
-
+      console.log('reached 3 quiz')
       // Mmap AI-generated questions to separate options
       const questionRows = questionsData.map(q => new Question({
         quiz_uuid: quiz.quiz_uuid,
@@ -31,8 +37,10 @@ export const QuizController = {
       }));
 
       await insertQuestions(questionRows);
+      console.log('reached 5 quiz')
       res.status(201).json({ quiz, questions: questionRows });
     } catch (err) {
+      console.log('Errored out: ',err)
       next(err);
     }
   },
