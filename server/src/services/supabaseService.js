@@ -41,12 +41,16 @@ return data;
 }
 
 export async function insertQuestions(questionRows) {
-const { data, error } = await supabase
-    .from("questions")
-    .insert(questionRows)
-    .select();
-if (error) throw error;
-return data;
+    console.log('quesions array: ',questionRows)
+    const { data, error } = await supabase
+        .from("questions")
+        .insert(questionRows)
+        .select();
+    if (error) {
+        console.log('Error uploading the quiz questions: ',error)
+        throw error;
+    }
+    return data;
 }
 
 export async function getQuestionsByQuizUuid(quiz_uuid) {

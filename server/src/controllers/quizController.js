@@ -2,6 +2,8 @@ import { Quiz } from "../models/Quiz.js";
 import { Question } from "../models/Question.js";
 import { createQuiz, getQuizByUuid, insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
 import { generateQuestionsFromPdf } from "../services/geminiService.js";
+import { v4 as uuidv4 } from 'uuid';
+
 
 export const QuizController = {
   async createQuiz(req, res, next) {
@@ -16,26 +18,27 @@ export const QuizController = {
       // expects title, comprehension level, file, and userID
       // console.log('pdf: ',pdf)
       if (!pdf) return res.status(400).json({ error: "PDF required" });
-
-      const quizObj = new Quiz({ user_id: userId, title, comprehension_level });
-
+      const quid = uuidv4();
+      const quizObj = new Quiz({ quiz_uuid: quid, user_id: userId, title: title, comprehension_level: comprehension_level });
+      console.log('quiz obj: ',quizObj)
       const quiz = await createQuiz(quizObj);
 
       const base64 = pdf.buffer.toString("base64");
       console.log('reached 2 quiz')
       const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
+      // console.log('question data: ',questionsData)
       console.log('reached 3 quiz')
       // Mmap AI-generated questions to separate options
       const questionRows = questionsData.map(q => new Question({
-        quiz_uuid: quiz.quiz_uuid,
+        quiz_id: quid,
         question_text: q.question,
         option_a: q.options[0],
         option_b: q.options[1],
         option_c: q.options[2],
         option_d: q.options[3],
-        correct_answer: q.correct
+        correct_option: q.correct
       }));
-
+      console.log('questionRows: ',questionRows)
       await insertQuestions(questionRows);
       console.log('reached 5 quiz')
       res.status(201).json({ quiz, questions: questionRows });

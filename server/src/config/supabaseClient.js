@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 console.log('url: ',process.env.SUPABASE_URL)
 console.log('key: ',process.env.SUPABASE_SERVICE_KEY)
 export const supabase = createClient(
-    'https://oopqdxfnojvztejvillt.supabase.co', 
-    'sb_publishable_cladJxkFse5MzFZBQQfooA_c0anCKFH'
+    process.env.SUPABASE_URL, 
+    process.env.SUPABASE_SERVICE_KEY
 );
 
 // export default supabase;

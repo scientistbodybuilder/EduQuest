@@ -34,15 +34,19 @@ const ComprehensionForm = (props) => {
             formData.append("title", title);
             formData.append("comprehension_level", comprehensionLevel);
             formData.append("userId", userId)
+            setLoading(true)
             try {
                 const success = await uploadNote(formData)
                 if (success.success) {
-                    setSubmitSuccess(true)
+                    setSubmitSuccess('success')
                 } else {
-                    setSubmitSuccess(false)
+                    setSubmitSuccess('fail')
                 }
             } catch (err) {
                 console.error('onsubmit',err)
+                setSubmitSuccess('fail')
+            } finally {
+                setLoading(false)
             }
         }
     }
@@ -66,12 +70,15 @@ const ComprehensionForm = (props) => {
             <>
                 <div className='overlay' onClick={handleOverlayClick}></div>
                 <form className='border border-[#ccc] bg-white w-2/3 md:w-1/2 lg:w-2/5 xl:w-1/3 2xl:w-1/4 flex flex-col items-center justify-center rounded-md modal' onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit(onSubmit)}>
-                    <div className='w-full flex items-center justify-end h-auto px-4 py-1 mb-10 mt-2'>
+                    <div className='w-full flex items-center justify-end h-auto px-4 py-1 mb-16 mt-2'>
                         <label className='font-semibold text-lg xl:text-xl cursor-pointer text-gray-700 hover:text-gray-500' onClick={()=>{
                             setSubmitSuccess(null)
                             setTitle('')
                             props.onClose()}
                             }>Cancel</label>
+                    </div>
+                    <div className='w-10/12 px-2 mb-8 flex flex-col items-center justify-start'>
+                            <p className='font-medium text-base md:text-lg 2xl:text-xl'>File: <span className='font-medium'>{props.file.name}</span></p>
                     </div>
 
                     <div className='w-10/12 px-2 mb-8 flex flex-col items-center justify-start'>
@@ -103,7 +110,7 @@ const ComprehensionForm = (props) => {
                         {!loading && submitSuccess != 'success' && (<input className='text-white w-full h-auto py-2 px-2 bg-gray-700 hover:bg-gray-500 transition-all duration-300 font-semibold text-lg xl:text-xl rounded-lg cursor-pointer shadow-sm' type='submit' value="Upload"/>)}
                         {!loading && submitSuccess == 'fail' && (<p className='text-red-800 mt-2'>Upload Failed</p>)}
                         {!loading && submitSuccess == 'success' && (<p className='text-green-500 mt-2'>Upload Successful!</p>)}
-                        {loading && (<img className='h-9 w-9' src='/spinner.svg' />)}
+                        {loading && (<div className='w-full h-auto py-2 px-2 bg-gray-700 hover:bg-gray-500 transition-all duration-300 rounded-lg cursor-pointer shadow-sm flex items-center justify-center'><img className='h-10 w-10' src='/spinner.svg' /></div>)}
                     </div>
                 </form>
             </>
