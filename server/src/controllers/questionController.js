@@ -1,3 +1,4 @@
+import { Question } from "../models/Question.js";
 import { insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
 import { generateQuestionsFromPdf } from "../services/geminiService.js";
 
@@ -10,13 +11,16 @@ export const QuestionController = {
       if (!file) return res.status(400).json({ error: "PDF required" });
 
       const base64 = file.buffer.toString("base64");
-      const questions = await generateQuestionsFromPdf(base64, comprehension_level);
+      const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
 
-      const questionRows = questions.map(q => ({
+      const questionRows = questionsData.map(q => new Question({
         quiz_uuid,
         question_text: q.question,
-        options: q.options,
-        correct_answer: q.correct,
+        option_a: q.options[0],
+        option_b: q.options[1],
+        option_c: q.options[2],
+        option_d: q.options[3],
+        correct_answer: q.correct
       }));
 
       const savedQuestions = await insertQuestions(questionRows);
@@ -34,5 +38,5 @@ export const QuestionController = {
     } catch (err) {
       next(err);
     }
-  },
+  }
 };

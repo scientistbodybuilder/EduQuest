@@ -1,6 +1,7 @@
+import { Quiz } from "../models/Quiz.js";
+import { Question } from "../models/Question.js";
 import { createQuiz, getQuizByUuid, insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
 import { generateQuestionsFromPdf } from "../services/geminiService.js";
-import { v4 as uuidv4 } from "uuid";
 
 export const QuizController = {
   async createQuiz(req, res, next) {
@@ -11,36 +12,31 @@ export const QuizController = {
 
       if (!file) return res.status(400).json({ error: "PDF required" });
 
-      const quiz_uuid = uuidv4();
+      const quizObj = new Quiz({ user_id: userId, title, comprehension_level });
 
-      // create quiz
-      const quiz = await createQuiz({
-        quiz_uuid,
-        user_id: userId,
-        title: title || "Untitled Quiz",
-        comprehension_level,
-      });
+      const quiz = await createQuiz(quizObj);
 
-      // call gemini service to generate questions
       const base64 = file.buffer.toString("base64");
-      const questions = await generateQuestionsFromPdf(base64, comprehension_level);
+      const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
 
-      // put question into db
-      const questionRows = questions.map(q => ({
-        quiz_uuid,
+      // Mmap AI-generated questions to separate options
+      const questionRows = questionsData.map(q => new Question({
+        quiz_uuid: quiz.quiz_uuid,
         question_text: q.question,
-        options: q.options,
-        correct_answer: q.correct,
+        option_a: q.options[0],
+        option_b: q.options[1],
+        option_c: q.options[2],
+        option_d: q.options[3],
+        correct_answer: q.correct
       }));
-      await insertQuestions(questionRows);
 
+      await insertQuestions(questionRows);
       res.status(201).json({ quiz, questions: questionRows });
     } catch (err) {
       next(err);
     }
   },
 
-  // grab quiz questions
   async getQuiz(req, res, next) {
     try {
       const { quiz_uuid } = req.params;
@@ -50,5 +46,5 @@ export const QuizController = {
     } catch (err) {
       next(err);
     }
-  },
+  }
 };

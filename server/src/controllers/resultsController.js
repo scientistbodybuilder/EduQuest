@@ -1,21 +1,15 @@
+import { Result } from "../models/Result.js";
 import { insertResult, getResultsByQuizUuid } from "../services/supabaseService.js";
-import { v4 as uuidv4 } from "uuid";
 
 export const ResultController = {
   async saveResult(req, res, next) {
     try {
-      const { quiz_uuid, score, total } = req.body;
+      const { quiz_uuid, score, duration_seconds, won } = req.body;
       const user_id = req.user.id;
 
-      const result_uuid = uuidv4();
-      const result = await insertResult({
-        result_uuid,
-        quiz_uuid,
-        user_id,
-        score,
-        total,
-      });
+      const resultObj = new Result({ quiz_uuid, user_id, score, duration_seconds, won });
 
+      const result = await insertResult(resultObj);
       res.status(201).json({ result });
     } catch (err) {
       next(err);
@@ -30,5 +24,5 @@ export const ResultController = {
     } catch (err) {
       next(err);
     }
-  },
+  }
 };
