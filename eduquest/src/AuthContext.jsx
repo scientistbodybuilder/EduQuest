@@ -5,36 +5,65 @@ const AuthContext = createContext()
 export const AuthContextProvider = ({children}) => {
     const [session, setSession] = useState(undefined)
 
-    
-
     useEffect(()=> {
+        // get current session
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session)
+            if (session?.user) {
+              initUser(session.user)
+            }
         })
 
+        // listen for changes to auth state
         supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session)
+            if (session?.user) {
+              initUser(session.user)
+            }
         })
-    },[])
+    },[]);
 
-    // const initUser = async (email, name) => {
-    //     const { data, error } = await supabase.from('profiles').select('*').eq('email',email)
-    //     if (!data) {
-    //         // initialize the user
-    //         const d = new Date().toISOString().split('T')[0]
-    //         console.log('date of creation: ',d)
-    //         const { initError } = await supabase.from('profiles').insert({
-    //             'email': email,
-    //             'full_name': name,
-    //             'created_at': d
-    //         })
-    //         if (initError.error) {
-    //             console.error('Error initializing user in profiles table: ', initError.error)
-    //         } else {
-    //             console.log('Profile initialized successfully')
-    //         }
-    //     }
-    // }
+    const initUser = async (user) => {
+
+      try {
+        const { id, email, user_metadata} = user;
+        const name = user_metadata?.name || 'No Name';
+
+        const { data: existingUser, error: findError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", id)
+          .single();
+
+        if (findError && findError.code !== "PGRST116") throw findError;
+
+        // if first time logging in, create profile in "profiles" table
+        if (!existingUser) {
+
+          const createdAt = new Date().toISOString();
+          const { data: newUser, error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                  id,
+                  email,
+                  full_name: name,
+                  created_at: createdAt,
+              });
+  
+          if (insertError) {
+              throw insertError;
+          }
+          console.log("New user added:", email);
+        }
+        else {
+          console.log("User already exists:", email);
+        }
+
+      }
+      catch (error) {
+        console.error('Error initializing user in profiles table: ', error)
+      }
+    };
 
 
     const oAuth = async () => {
@@ -46,14 +75,6 @@ export const AuthContextProvider = ({children}) => {
         });
     
         if (error) console.error('Login error:', error);
-
-        // const { data: { session }, errorObj } = await supabase.auth.getSession();
-        //     if (errorObj.error) console.error(errorObj.error);
-        //     if (session) {
-        //         console.log('User:', session.user); 
-                
-        //         // await initUser(session.user?.email, session.user?.user_metadata.name)
-        //     }
       };
 
     return( <AuthContext.Provider value={{ session, oAuth }}>
