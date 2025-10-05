@@ -1,6 +1,6 @@
 import { Quiz } from "../models/Quiz.js";
 import { Question } from "../models/Question.js";
-import { createQuiz, getQuizByUuid, insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
+import { createQuiz, listUserQuizzes, getQuizByUuid, insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
 import { generateQuestionsFromPdf } from "../services/geminiService.js";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -51,11 +51,33 @@ export const QuizController = {
   async getQuiz(req, res, next) {
     try {
       const { quiz_uuid } = req.params;
+      console.log('received quiz id: ', quiz_uuid)
       const quiz = await getQuizByUuid(quiz_uuid);
       const questions = await getQuestionsByQuizUuid(quiz_uuid);
       res.json({ quiz, questions });
     } catch (err) {
       next(err);
+    }
+  },
+
+  async getQuizzes(req, res, next) {
+    console.log('reached aa')
+    try {
+      const { userId } = req.body
+      const quizzes = await listUserQuizzes(userId)
+      console.log('user quizzes: ',quizzes)
+      //get the question number
+      for (let i=0; i < quizzes.length; i++) {
+        const qid = quizzes[i].id
+        const quesions = await getQuestionsByQuizUuid(qid)
+        console.log('questions for a quiz: '), quesions
+        const numQuestions = quesions.length
+        quizzes[i].questions = numQuestions
+      }
+
+      res.json({ quizzes })
+    } catch (err) {
+      next(err)
     }
   }
 };

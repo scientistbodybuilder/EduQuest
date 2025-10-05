@@ -1,21 +1,36 @@
 import React, { useState, useEffect } from 'react'
 import Header from '../Header'
 import { UserAuth } from '../../AuthContext'
+import { getQuizzes } from '../../services/dashboardServices'
+import Card from './Card'
 
 const Home = () => {
     const { session } = UserAuth()
     console.log('session: ', session?.user)
-    const [userId, setUserId] = useState(null)
-    const [name, setName] = useState(null)
+    
     const [loading, setLoading] = useState(false)
+    const [quizzes, setQuizzes] = useState([])
+
+    const userId = session?.user?.id
+    const name = session?.user?.user_metadata?.full_name
+
+
+    const fetchQuizzes = async (id) => {
+        if (!userId) return
+        setLoading(true)
+        try {
+            const res = await getQuizzes(id)
+            setQuizzes(res)
+        } catch (err) {
+
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        setName(session.user?.user_metadata.full_name)
-        setUserId(session.user?.id)
-    }, [session])
-    const getQuizzes = async (id) => {
-
-    }
+        fetchQuizzes(userId)
+    },[userId])
 
     useEffect(() => {
         setLoading(true)
@@ -36,10 +51,22 @@ const Home = () => {
                     <h3 className='font-bold text-2xl md:text-3xl xl:text-4xl'>Welcome {name}</h3>
                     <p className='text-gray-600 text-base lg:text-lg'>Select a quiz to begin practicing</p>
                 </div>
+                <>
+                    {loading ? (<div className='mt-28 h-24 w-24 flex items-center justify-center'><img className='max-h-full' src='/spinner.svg'/></div>)
+                    :
+                    (
+                        <div className='grid w-full mt-16'>
+                            {quizzes.length > 0 && quizzes?.map((item,index) => {
 
-                <div>
-                    
-                </div>
+                                return <Card title={item.title} key={index} quizId={item.id} questions={item.questions}/>
+                            })
+                        }
+
+                        </div>
+                    )}
+                </>
+
+        
             </div>
             
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import ChoiceCard from './ChoiceCard'
 import SpriteAnimator from './SpriteAnimator'
 import Header from '../Header'
@@ -10,9 +10,14 @@ import enemy_slash from '../../assets/sound/enemy_slash_sound.mp3'
 import bg_sound from '../../assets/sound/test.mp3'
 import { FaPause } from "react-icons/fa";
 import GameMenu from './GameMenu'
+import { UserAuth } from '../../AuthContext'
+
+import { getQuestions, submitResults } from '../../services/gameServices'
 
 const Game = () => {
     const navigate = useNavigate()
+    const location = useLocation()
+    const { session } = UserAuth()
     const [playerHealth, setPlayerHealth] = useState(100)
     const [enemyHealth, setEnemyHealth] = useState(100)
     const [attackPoints, setAttackPoints] = useState(10)
@@ -24,12 +29,22 @@ const Game = () => {
         height: window.innerHeight,
     });
     const [openModal, setOpenModal] = useState(true)
-    const [gameState, setGameState] = useState('')
     const [questions, setQuestions] = useState([])
+    const [questionIndex, setQuestionInedx] = useState(0)
+    const [correct, setCorrect] = useState(0)
+    const [won, setWon] = useState(false)
+    const [uploadingResults, setUploadingResults] = useState(false)
 
+    const data = location.state;
+    const userId = session.user?.id
     const audioHurtRef = useRef(null);
     const audioSlashRef = useRef(null)
     const audioBGRef = useRef(null)
+
+    const results = {
+        user_id: userId,
+        quizId: data?.quizId
+    }
 
     const playHurtSound = () => {
         audioHurtRef.current.play();
@@ -44,8 +59,41 @@ const Game = () => {
     }
 
     const endQuiz = () => {
+        setQuestionInedx(0)
         navigate("/")
     }
+
+    const fetchQuestions = async () => {
+        try {
+            const res = await getQuestions(data?.quizId)
+            if(res) {
+                setQuestions(res)
+            }
+        } catch (err) {
+
+        }
+    }
+
+    const uploadResults = async () => {
+        try {
+            results.won = won
+            results.score = `${correct}/${questions.length}`
+            const res = await submitResults(results)
+            if (res.success) {
+
+            } else {
+
+            }
+        } catch (err) {
+
+        } finally {
+            setUploadingResults(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchQuestions() 
+    },[])
 
     useEffect(() => {
         const handleResize = () => {
@@ -69,25 +117,6 @@ const Game = () => {
         }
     },[size])
 
-    const temp = {
-        question: "Which city is University of Toronto located?",
-        choices: [
-            {   text: "Toronto",
-                letter: "A"
-            },
-            {   text: "Hamilton",
-                letter: "B"
-            },
-            {   text: "Kingston",
-                letter: "C"
-            },
-            {   text: "Kitchener",
-                letter: "D"
-            },
-        ],
-        answer: "A"
-    }
-
     const bRef = useRef();
 
     const handleAction = (ani) => {
@@ -98,34 +127,39 @@ const Game = () => {
 
     const Answer = () => {
         console.log('Student submitted an answer: ',selected)
-        if (selected === temp.answer) {
-            console.log("That's correct!")
+        if (selected === questions[questionIndex]?.correct_option) {
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
             playHurtSound()
             handleAction('hurt')
-            console.log('Enemy health: ', enemyHealth)
+            setCorrect(prev => prev + 1)
         } else {
-            console.log("That is incorrect")
             setPlayerHealth(Math.max(playerHealth - attackPoints,0))
             playSlashSound()
             handleAction('attack')
-            console.log('Player health: ',playerHealth)
         }
+        
     }
-
 
     useEffect(() => {
         if (playerHealth == 0) {
-            console.log("Player has lost")
-        }
-    },[playerHealth])
-
-    useEffect(() => {
-        if (enemyHealth == 0) {
-            console.log("Player has won")
+            setUploadingResults(true)
+            uploadResults()
+        } else if (enemyHealth == 0) {
+            setWon(true)
             handleAction('dying')
+            setUploadingResults(true)
+            uploadResults()
+        } else if (questionIndex < questions.length - 1) {
+            setQuestionInedx(questionIndex + 1)
+        } else {
+            //got through all the questions
+            setWon(true)
+            handleAction('dying')
+            setUploadingResults(true)
+            uploadResults()
         }
-    },[enemyHealth])
+    },[playerHealth, enemyHealth])
+
 
     return(
         <section className='w-full h-full flex flex-col items-center justify-end relative' style={{backgroundImage: `url(${bg})`, backgroundSize: 'cover'}}>
@@ -133,19 +167,35 @@ const Game = () => {
             <audio ref={audioHurtRef} src={enemy_hurt} />
             <audio ref={audioSlashRef} src={enemy_slash} />
             {!openModal && <audio ref={audioBGRef} src={bg_sound} autoPlay loop/>}
-            <div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-1/2 lg:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
-                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-center text-blue-500 mb-6'>{temp?.question}</h3>
-                {
+            {questions && (<div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
+                <h3 className='w-10/12 font-semibold text-base md:text-lg xl:text-xl text-center text-blue-500 mb-6'>{questions[questionIndex]?.question_text}</h3>
+                {/* {
                     temp && temp.choices?.map((item,index) => {
                         return <ChoiceCard text={item.text} selected={selectedIndex === index ? true : false} click={() => {
                             setSelectedIndex(index)
                             setSelected(item.letter)
                         }}/>
                     })
-                }
+                } */}
+                <ChoiceCard text={questions[questionIndex]?.option_a} selected={selectedIndex === 0 ? true : false} click={() => {
+                            setSelectedIndex(0)
+                            setSelected('A')
+                        }}/>
+                <ChoiceCard text={questions[questionIndex]?.option_b} selected={selectedIndex === 1 ? true : false} click={() => {
+                            setSelectedIndex(1)
+                            setSelected('B')
+                        }}/>
+                <ChoiceCard text={questions[questionIndex]?.option_c} selected={selectedIndex === 2 ? true : false} click={() => {
+                            setSelectedIndex(2)
+                            setSelected('C')
+                        }}/>
+                <ChoiceCard text={questions[questionIndex]?.option_d} selected={selectedIndex === 3 ? true : false} click={() => {
+                            setSelectedIndex(3)
+                            setSelected('D')
+                        }}/>
                 <label className='text-white focus:outline-none bg-blue-400 cursor-pointer mt-2 border-none px-2 py-1 rounded-lg font-medium text-lg md:text-xl lg:text-2xl hover:bg-blue-500 transition-all duration-300' onClick={()=>Answer()}>Submit</label>
 
-            </div>
+            </div>)}
 
             <div className='h-auto w-11/12 flex items-center justify-center mb-24'>
                 <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12}/>
@@ -155,7 +205,11 @@ const Game = () => {
                 <FaPause size={40} color='white'/>
             </div>
 
-            <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gray-200 flex items-center justify-between border'>
+            {uploadingResults && (<div className='absolute left-2 bottom-32 flex items-center justify-center z-10 h-auto xl:px-5 px-4 xl:py-5 py-4'>
+                <img className='h-20 w-20 xl:h-28 xl:w-28' src='/spinner.svg'/>
+            </div>)}
+
+            <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-[#e3eaff] flex items-center justify-between border'>
                 <div className='w-1/2 flex flex-col items-start gap-2'>
                     <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Player Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2'>

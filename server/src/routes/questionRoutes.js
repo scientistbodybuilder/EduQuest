@@ -2,10 +2,10 @@ import express from "express";
 import multer from "multer";
 import { QuestionController } from "../controllers/questionController.js";
 
-const router = express.Router();
+const questionRouter = express.Router();
 const upload = multer();
 
-router.post("/generate", upload.single("pdf"), QuestionController.generateQuestions);
-router.get("/:quiz_uuid", QuestionController.getQuestions);
+questionRouter.post("/generate", upload.single("pdf"), QuestionController.generateQuestions);
+questionRouter.get("/:quiz_uuid", QuestionController.getQuestions);
 
-export default router;
+export default questionRouter;

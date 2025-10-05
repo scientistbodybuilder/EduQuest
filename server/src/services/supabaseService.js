@@ -57,7 +57,7 @@ export async function getQuestionsByQuizUuid(quiz_uuid) {
 const { data, error } = await supabase
     .from("questions")
     .select("*")
-    .eq("quiz_uuid", quiz_uuid);
+    .eq("quiz_id", quiz_uuid);
 if (error) throw error;
 return data;
 }
