@@ -4,7 +4,7 @@ import {
   getResultsForUser, // get all results for the authenticated user
   getResultsForQuiz, // get all results for a specific quiz 
   addResult // add a new result 
-} from "../controllers/resultController.js";
+} from "../controllers/resultsController.js";
 
 const router = express.Router();
 
