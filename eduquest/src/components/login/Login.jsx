@@ -15,7 +15,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center h-full w-full bg-gray-100">
+    <div className="flex items-center justify-center h-full w-full bg-[#bcc8f1]">
       <div className='w-2/3 lg:w-1/2 xl:w-2/5 2xl:w-1/3 rounded-md shadow-lg px-2 py-1 h-auto flex flex-col items-center justify-center border border-[#ccc]'>
         <h2 className='text-2xl xl:text-3xl 2xl:text-4xl font-semibold mb-20 mt-10'>Login</h2>
 

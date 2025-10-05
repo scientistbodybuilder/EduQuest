@@ -10,12 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@fontsource/inter": "^5.2.8",
-=======
     "@auth0/auth0-react": "^2.5.0",
     "@supabase/supabase-js": "^2.58.0",
->>>>>>> d6e9ea2082de17af3d32b5d40b660ad4176bb160
     "@tailwindcss/vite": "^4.1.14",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
