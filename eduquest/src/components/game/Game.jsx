@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ChoiceCard from './ChoiceCard'
 import SpriteAnimator from './SpriteAnimator'
+import Header from '../Header'
+import bg from '../../assets/backgrounds/game_bg_1.jpg'
+import enemy_hurt from '../../assets/sound/enemy_hurt_sound.mp3'
+import enemy_slash from '../../assets/sound/enemy_slash_sound.mp3'
+import { FaPause } from "react-icons/fa";
+import GameMenu from './GameMenu'
 
 const Game = () => {
     const [playerHealth, setPlayerHealth] = useState(100)
@@ -13,8 +19,19 @@ const Game = () => {
         width: window.innerWidth,
         height: window.innerHeight,
     });
+    const [openModal, setOpenModal] = useState(false)
     const [gameState, setGameState] = useState('')
-    const [animation, setAnimation] = useState('idle')
+
+    const audioHurtRef = useRef(null);
+    const audioSlashRef = useRef(null)
+
+    const playHurtSound = () => {
+        audioHurtRef.current.play();
+    };
+
+    const playSlashSound = () => {
+        audioSlashRef.current.play();
+    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -70,11 +87,13 @@ const Game = () => {
         if (selected === temp.answer) {
             console.log("That's correct!")
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
+            playHurtSound()
             handleAction('hurt')
             console.log('Enemy health: ', enemyHealth)
         } else {
             console.log("That is incorrect")
             setPlayerHealth(Math.max(playerHealth - attackPoints,0))
+            playSlashSound()
             handleAction('attack')
             console.log('Player health: ',playerHealth)
         }
@@ -95,9 +114,12 @@ const Game = () => {
     },[enemyHealth])
 
     return(
-        <section className='w-full h-full flex flex-col items-center justify-center relative'>
-            <div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-1/2 lg:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-3 py-4 flex flex-col items-center justify-center'>
-                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-center text-blue-400 mb-6'>{temp?.question}</h3>
+        <section className='w-full h-full flex flex-col items-center justify-end relative' style={{backgroundImage: `url(${bg})`, backgroundSize: 'cover'}}>
+            {/* <audio ref={audioRef} src="" loop /> */}
+            <audio ref={audioHurtRef} src={enemy_hurt} />
+            <audio ref={audioSlashRef} src={enemy_slash} />
+            <div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-1/2 lg:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
+                <h3 className='font-semibold text-lg md:text-xl xl:text-2xl text-center text-blue-600 mb-6'>{temp?.question}</h3>
                 {
                     temp && temp.choices?.map((item,index) => {
                         return <ChoiceCard text={item.text} selected={selectedIndex === index ? true : false} click={() => {
@@ -110,8 +132,12 @@ const Game = () => {
 
             </div>
 
-            <div className='h-auto w-11/12 flex items-center justify-center'>
+            <div className='h-auto w-11/12 flex items-center justify-center mb-24'>
                 <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12}/>
+            </div>
+
+            <div className='absolute right-2 bottom-16 rounded-md'>
+
             </div>
 
             <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gray-300 flex items-center justify-between border'>
@@ -132,9 +158,20 @@ const Game = () => {
                 </div>
             </div>
 
+            <GameMenu open={openModal} />
+
         </section>
     )
 }
 
+const GameExport = () => {
+    return(
+        <div className='w-full h-full flex flex-col items-center justify-start'>
+            <Header />
+            <Game />
+        </div>
+    )
+}
 
-export default Game
+
+export default GameExport

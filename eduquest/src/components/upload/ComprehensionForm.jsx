@@ -36,7 +36,7 @@ const ComprehensionForm = (props) => {
         return(
             <>
                 <div className='overlay' onClick={handleOverlayClick}></div>
-                <form className='border border-[#ccc] bg-white w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 2xl:w-1/3 flex flex-col items-center justify-center rounded-md new-order' onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit(onSubmit)}>
+                <form className='border border-[#ccc] bg-white w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 2xl:w-1/3 flex flex-col items-center justify-center rounded-md modal' onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit(onSubmit)}>
                     <div className='w-full flex items-center justify-end h-auto px-4 py-1 mb-10 mt-2'>
                         <label className='font-semibold text-lg xl:text-xl cursor-pointer text-gray-700 hover:text-gray-500' onClick={props.onClose}>Cancel</label>
                     </div>
