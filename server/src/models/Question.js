@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export class Question {
   constructor({ question_uuid, quiz_uuid, question_text, option_a, option_b, option_c, option_d, correct_answer, created_at }) {
     this.question_uuid = question_uuid || crypto.randomUUID();

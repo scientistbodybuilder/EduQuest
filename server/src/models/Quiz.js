@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export class Quiz {
   constructor({ quiz_uuid, user_id, title, comprehension_level, created_at }) {
     this.quiz_uuid = quiz_uuid;

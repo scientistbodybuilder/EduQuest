@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export class Result {
   constructor({ result_uuid, quiz_uuid, user_id, score, duration_seconds, won, created_at }) {
     this.result_uuid = result_uuid || crypto.randomUUID();
