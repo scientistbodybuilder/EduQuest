@@ -1,29 +1,46 @@
 import React from 'react';
 import { supabase } from '../../utils/supabaseClient';
+import { UserAuth } from '../../AuthContext';
+import { FcGoogle } from "react-icons/fc";
+import Header from '../Header';
 
-export default function Login() {
-  const handleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/home`,
-      },
-    });
 
-    if (error) console.error('Login error:', error);
-    else console.log('Login data:', data);
+const Login = () => {
+  const { session, oAuth } = UserAuth()
+  const oAuthLogin = async () => {
+    try {
+      await oAuth()
+    } catch (err) {
+      console.log('Error: ',err)
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-        <h1 className="text-2xl font-bold mb-6 block">Welcome to EduQuest!</h1>
-        <br/>
-        <button 
-            onClick={handleLogin} 
-            className="gap-2"
+    <div className="flex items-center justify-center h-full w-full bg-[#bcc8f1]">
+      {/* <div className='absolute top-0 left-2 h-12 flex items-center justify-center'>
+        <img className='h-32 xl:h-36' src="/Logo.png" />
+      </div> */}
+      <div className='w-2/3 lg:w-1/2 xl:w-2/5 2xl:w-1/3 rounded-md shadow-lg px-2 py-1 h-auto flex flex-col items-center justify-center border bg-white border-[#ccc]'>
+        <h2 className='text-2xl xl:text-3xl 2xl:text-4xl font-semibold mb-20 mt-10'>Login</h2>
+
+        <p className='text-lg xl:text-xl mb-6'>Sign in with google</p>
+        <label className='w-10/12 rounded-md py-2 px-3 flex items-center justify-center bg-black hover:bg-gray-800 transition-all duration-200 mb-20 cursor-pointer'
+        onClick={oAuthLogin} 
         >
-        Login with Google
-        </button>
+        <FcGoogle size={35} />
+      </label>
+      </div>
     </div>
   );
 }
+
+const LoginExport = () => {
+  return(
+    <div className='w-full h-full flex flex-col items-center justify-start'>
+      <Header />
+      <Login />
+    </div>
+  )
+}
+
+export default LoginExport
