@@ -1,18 +1,11 @@
 import express from "express";
 import multer from "multer";
-import authMiddleware from "../middleware/authMiddleware.js";
-import {
-  generateQuestionsForQuiz, // call gemini + persist to db
-  getQuestionsForQuiz       // return questions with specified quiz_uuid
-} from "../controllers/questionController.js";
+import { QuestionController } from "../controllers/questionController.js";
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer();
 
-// make questions for a quiz from uploaded file
-router.post("/generate", authMiddleware, upload.single("file"), generateQuestionsForQuiz);
-
-// return questions for a quiz with specified quiz_uuid
-router.get("/:quiz_uuid", authMiddleware, getQuestionsForQuiz);
+router.post("/generate", upload.single("pdf"), QuestionController.generateQuestions);
+router.get("/:quiz_uuid", QuestionController.getQuestions);
 
 export default router;
