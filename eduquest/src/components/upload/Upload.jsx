@@ -12,7 +12,8 @@ const Upload = () => {
 
 
     const handleFileChange = (e) => {
-        if (e.target.files && e.target.files.type == 'application/pdf') {
+        console.log('file: ', e.target.files)
+        if (e.target.files && e.target.files[0].type == 'application/pdf') {
             console.log(e.target.files)
             setFile(e.target.files[0])
             setTypeError(false)
@@ -28,11 +29,11 @@ const Upload = () => {
     }
 
     return(
-        <div className='w-full h-full flex flex-col items-center justify-start'>
+        <div className='w-full h-full flex flex-col items-center justify-start bg-[#bcc8f1]'>
             <div className='mt-20 w-11/12 lg:w-10/12 flex flex-col items-center justify-start'>
                 <div className='w-full h-atuo'>
                     <h3 className='font-bold text-2xl md:text-3xl xl:text-4xl'>Upload a Document</h3>
-                    <p className='text-gray-400 text-base lg:text-lg'>Select any PDF file to upload</p>
+                    <p className='text-gray-600 text-base lg:text-lg'>Select any PDF file to upload</p>
                 </div>
 
                 <div className='mt-24 w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 2xl:w-1/3 flex flex-col items-center justify-center h-auto'>
@@ -41,7 +42,7 @@ const Upload = () => {
                         <input type='file' onChange={handleFileChange} className='hidden' />
                     </label>
                     <div className='w-full h-auto'>
-                        <p className='text-gray-400 text-base md:text-lg mt-4'>Maximum upload size: 20 MB</p>
+                        <p className='text-gray-700 text-base md:text-lg mt-4'>Maximum upload size: 20 MB</p>
                         {typeError && (<p className='text-red-600 text-base md:text-lg mt-2'>File was not of type PDF</p>)}
                     </div>
                 </div>
