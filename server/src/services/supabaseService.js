@@ -20,6 +20,26 @@ if (error) throw error;
 return data;
 }
 
+export async function listUserQuizzes(user_id) {
+const { data, error } = await SupabaseClient
+    .from("quizzes")
+    .select("*")
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false });
+if (error) throw error;
+return data;
+}
+
+export async function submitQuizResults(resultRow) {
+const { data, error } = await SupabaseClient
+    .from("results")
+    .insert([resultRow])
+    .select()
+    .single();
+if (error) throw error;
+return data;
+}
+
 export async function insertQuestions(questionRows) {
 const { data, error } = await SupabaseClient
     .from("questions")
