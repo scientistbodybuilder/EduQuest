@@ -1,0 +1,85 @@
+import { SupabaseClient } from "../clients/supabaseClient.js";
+
+export async function createQuiz(quizRow) {
+const { data, error } = await SupabaseClient
+    .from("quizzes")
+    .insert([quizRow])
+    .select()
+    .single();
+if (error) throw error;
+return data;
+}
+
+export async function getQuizByUuid(uuid) {
+const { data, error } = await SupabaseClient
+    .from("quizzes")
+    .select("*")
+    .eq("quiz_uuid", uuid)
+    .single();
+if (error) throw error;
+return data;
+}
+
+export async function insertQuestions(questionRows) {
+const { data, error } = await SupabaseClient
+    .from("questions")
+    .insert(questionRows)
+    .select();
+if (error) throw error;
+return data;
+}
+
+export async function getQuestionsByQuizUuid(quiz_uuid) {
+const { data, error } = await SupabaseClient
+    .from("questions")
+    .select("*")
+    .eq("quiz_uuid", quiz_uuid);
+if (error) throw error;
+return data;
+}
+
+export async function insertResult(resultRow) {
+const { data, error } = await SupabaseClient
+    .from("results")
+    .insert([resultRow])
+    .select()
+    .single();
+if (error) throw error;
+return data;
+}
+
+export async function getResultsByQuizUuid(quiz_uuid) {
+const { data, error } = await SupabaseClient
+    .from("results")
+    .select("*")
+    .eq("quiz_uuid", quiz_uuid);
+if (error) throw error;
+return data;
+}
+
+export async function getUserByUid(userUid) {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userUid)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+    return data;
+}
+
+export async function updateUserByUid(userUid, userData) {
+    const { data, error } = await supabase
+        .from('profiles')
+        .update(userData)
+        .eq('id', userUid)
+        .select() // to return updated row
+        .single();
+
+    if (error) {
+        throw error;
+    }
+    return data;
+}
