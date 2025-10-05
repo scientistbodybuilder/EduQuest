@@ -3,7 +3,7 @@ import { supabase } from '../../utils/supabaseClient';
 
 export default function Login() {
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/home`,
@@ -11,15 +11,19 @@ export default function Login() {
     });
 
     if (error) console.error('Login error:', error);
+    else console.log('Login data:', data);
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <button 
-        onClick={handleLogin} 
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <h1 className="text-2xl font-bold mb-6 block">Welcome to EduQuest!</h1>
+        <br/>
+        <button 
+            onClick={handleLogin} 
+            className="gap-2"
         >
         Login with Google
-      </button>
+        </button>
     </div>
   );
 }
