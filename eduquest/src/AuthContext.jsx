@@ -17,24 +17,24 @@ export const AuthContextProvider = ({children}) => {
         })
     },[])
 
-    const initUser = async (email, name) => {
-        const { data, error } = await supabase.from('profiles').select('*').eq('email',email)
-        if (!data) {
-            // initialize the user
-            const d = new Date().toISOString().split('T')[0]
-            console.log('date of creation: ',d)
-            const { initError } = await supabase.from('profiles').insert({
-                'email': email,
-                'full_name': name,
-                'created_at': d
-            })
-            if (initError.error) {
-                console.error('Error initializing user in profiles table: ', initError.error)
-            } else {
-                console.log('Profile initialized successfully')
-            }
-        }
-    }
+    // const initUser = async (email, name) => {
+    //     const { data, error } = await supabase.from('profiles').select('*').eq('email',email)
+    //     if (!data) {
+    //         // initialize the user
+    //         const d = new Date().toISOString().split('T')[0]
+    //         console.log('date of creation: ',d)
+    //         const { initError } = await supabase.from('profiles').insert({
+    //             'email': email,
+    //             'full_name': name,
+    //             'created_at': d
+    //         })
+    //         if (initError.error) {
+    //             console.error('Error initializing user in profiles table: ', initError.error)
+    //         } else {
+    //             console.log('Profile initialized successfully')
+    //         }
+    //     }
+    // }
 
 
     const oAuth = async () => {
@@ -47,13 +47,13 @@ export const AuthContextProvider = ({children}) => {
     
         if (error) console.error('Login error:', error);
 
-        const { data: { session }, errorObj } = await supabase.auth.getSession();
-            if (errorObj.error) console.error(errorObj.error);
-            if (session) {
-                console.log('User:', session.user); 
+        // const { data: { session }, errorObj } = await supabase.auth.getSession();
+        //     if (errorObj.error) console.error(errorObj.error);
+        //     if (session) {
+        //         console.log('User:', session.user); 
                 
-                await initUser(session.user?.email, session.user?.user_metadata.name)
-            }
+        //         // await initUser(session.user?.email, session.user?.user_metadata.name)
+        //     }
       };
 
     return( <AuthContext.Provider value={{ session, oAuth }}>
