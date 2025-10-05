@@ -7,6 +7,7 @@ import cors from "cors"
 //Routes
 import quizRouter from "./src/routes/quizRoutes.js"
 import questionRouter from "./src/routes/questionRoutes.js";
+import resultRouter from "./src/routes/resultsRoutes.js";
 
 const app = express()
 
@@ -18,6 +19,7 @@ app.use(cors({
 
 app.use("/api", quizRouter)
 app.use("/api/questions", questionRouter)
+app.use("/api/results", resultRouter)
 
 const PORT = 4000
 

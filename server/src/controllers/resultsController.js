@@ -4,12 +4,14 @@ import { insertResult, getResultsByQuizUuid } from "../services/supabaseService.
 export const ResultController = {
   async saveResult(req, res, next) {
     try {
-      const { quiz_uuid, score, duration_seconds, won } = req.body;
-      const user_id = req.user.id;
+      const { quiz_uuid, score, won, user_id } = req.body;
+      // const user_id = req.user.id;
 
-      const resultObj = new Result({ quiz_uuid, user_id, score, duration_seconds, won });
-
+      const resultObj = new Result({ quiz_uuid, user_id, score, won });
+      console.log('inserting result')
+      console.log('obj: ',resultObj)
       const result = await insertResult(resultObj);
+      console.log('result inserted')
       res.status(201).json({ result });
     } catch (err) {
       next(err);

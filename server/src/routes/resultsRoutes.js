@@ -1,9 +1,9 @@
 import express from "express";
-import { ResultController } from "../controllers/resultController.js";
+import { ResultController } from "../controllers/resultsController.js";
 
-const router = express.Router();
+const resultRouter = express.Router();
 
-router.post("/save", ResultController.saveResult);
-router.get("/:quiz_uuid", ResultController.getResults);
+resultRouter.post("/save", ResultController.saveResult);
+resultRouter.get("/:quiz_uuid", ResultController.getResults);
 
-export default router;
+export default resultRouter;

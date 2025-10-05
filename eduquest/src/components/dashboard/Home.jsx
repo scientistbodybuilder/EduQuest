@@ -52,11 +52,11 @@ const Home = () => {
                     <p className='text-gray-600 text-base lg:text-lg'>Select a quiz to begin practicing</p>
                 </div>
                 <>
-                    {loading ? (<div className='mt-28 h-24 w-24 flex items-center justify-center'><img className='max-h-full' src='/spinner.svg'/></div>)
+                    {loading ? (<div className='mt-28 h-44 w-44 flex items-center justify-center'><img className='max-h-full' src='/spinner.svg'/></div>)
                     :
                     (
                         <div className='grid w-full mt-16'>
-                            {quizzes.length > 0 && quizzes?.map((item,index) => {
+                            {quizzes?.length > 0 && quizzes?.map((item,index) => {
 
                                 return <Card title={item.title} key={index} quizId={item.id} questions={item.questions}/>
                             })

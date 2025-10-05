@@ -65,10 +65,13 @@ return data;
 export async function insertResult(resultRow) {
 const { data, error } = await supabase
     .from("results")
-    .insert([resultRow])
+    .insert(resultRow)
     .select()
     .single();
-if (error) throw error;
+if (error) {
+    console.log('error submitting res: ', error)
+    throw error;
+}
 return data;
 }
 

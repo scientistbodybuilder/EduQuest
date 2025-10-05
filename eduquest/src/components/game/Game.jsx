@@ -18,9 +18,10 @@ const Game = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const { session } = UserAuth()
+    const [maxHealth, setMaxHealth] = useState(100)
     const [playerHealth, setPlayerHealth] = useState(100)
     const [enemyHealth, setEnemyHealth] = useState(100)
-    const [attackPoints, setAttackPoints] = useState(10)
+    const [attackPoints, setAttackPoints] = useState(1)
     const [selected, setSelected] = useState(null)
     const [selectedIndex, setSelectedIndex] = useState(null)
     const [spriteDim, setSpriteDim] = useState(500)
@@ -43,7 +44,7 @@ const Game = () => {
 
     const results = {
         user_id: userId,
-        quizId: data?.quizId
+        quiz_uuid: data?.quizId
     }
 
     const playHurtSound = () => {
@@ -67,7 +68,11 @@ const Game = () => {
         try {
             const res = await getQuestions(data?.quizId)
             if(res) {
+                console.log('res: ',res.length)
                 setQuestions(res)
+                setPlayerHealth(res?.length)
+                setEnemyHealth(res?.length)
+                setMaxHealth(res?.length)
             }
         } catch (err) {
 
@@ -79,16 +84,12 @@ const Game = () => {
             results.won = won
             results.score = `${correct}/${questions.length}`
             const res = await submitResults(results)
-            if (res.success) {
-
-            } else {
-
-            }
         } catch (err) {
 
         } finally {
             setUploadingResults(false)
         }
+        // endQuiz()
     }
 
     useEffect(() => {
@@ -127,7 +128,7 @@ const Game = () => {
 
     const Answer = () => {
         console.log('Student submitted an answer: ',selected)
-        if (selected === questions[questionIndex]?.correct_option) {
+        if (1 == 1) {
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
             playHurtSound()
             handleAction('hurt')
@@ -144,6 +145,7 @@ const Game = () => {
         if (playerHealth == 0) {
             setUploadingResults(true)
             uploadResults()
+            endQuiz()
         } else if (enemyHealth == 0) {
             setWon(true)
             handleAction('dying')
@@ -151,13 +153,20 @@ const Game = () => {
             uploadResults()
         } else if (questionIndex < questions.length - 1) {
             setQuestionInedx(questionIndex + 1)
-        } else {
-            //got through all the questions
-            setWon(true)
-            handleAction('dying')
+        } else if (questionIndex == questions.length - 1) {
+            setWon(correct/questions.length >= 5 ? true : false)
             setUploadingResults(true)
             uploadResults()
+            endQuiz()
         }
+        // else {
+        //     //got through all the questions
+        //     setWon(true)
+        //     handleAction('dying')
+        //     setUploadingResults(true)
+        //     uploadResults()
+        // }
+        console.log('question length: ', questions.length)
     },[playerHealth, enemyHealth])
 
 
@@ -198,7 +207,7 @@ const Game = () => {
             </div>)}
 
             <div className='h-auto w-11/12 flex items-center justify-center mb-24'>
-                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12}/>
+                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12} end={endQuiz}/>
             </div>
 
             <div className='absolute right-2 bottom-32 cursor-pointer rounded-md flex items-center justify-center z-10 h-auto xl:px-5 px-4 xl:py-5 py-4' onClick={()=>setOpenModal(true)} style={{backgroundImage: `url(${log})`, backgroundSize: 'cover'}}>
@@ -209,12 +218,12 @@ const Game = () => {
                 <img className='h-20 w-20 xl:h-28 xl:w-28' src='/spinner.svg'/>
             </div>)}
 
-            <div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-[#e3eaff] flex items-center justify-between border'>
+            {questions && (<div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-[#e3eaff] flex items-center justify-between border'>
                 <div className='w-1/2 flex flex-col items-start gap-2'>
                     <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Player Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2'>
                         <div className='absolute h-full w-full bg-red-700 rounded-md'></div>
-                        <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tl-md rounded-bl-md transition-all duration-300 ${playerHealth == 100 ? 'rounded-tr-md rounded-br-md' : ''}`} style={{width: `${playerHealth}%`}}></div>
+                        <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tl-md rounded-bl-md transition-all duration-300 ${playerHealth == questions.length ? 'rounded-tr-md rounded-br-md' : ''}`} style={{width: `${(playerHealth / maxHealth) * 100}%`}}></div>
                     </div>
                 </div>
 
@@ -222,10 +231,10 @@ const Game = () => {
                     <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Enemy Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2 flex justify-end'>
                         <div className='absolute h-full w-full bg-red-700 rounded-md'></div>
-                        <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tr-md rounded-br-md transition-all duration-300 ${enemyHealth == 100 ? 'rounded-tl-md rounded-bl-md' : ''}`} style={{width: `${enemyHealth}%`}}></div>
+                        <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tr-md rounded-br-md transition-all duration-300 ${enemyHealth == questions.length ? 'rounded-tl-md rounded-bl-md' : ''}`} style={{width: `${(enemyHealth / maxHealth) * 100}%`}}></div>
                     </div>
                 </div>
-            </div>
+            </div>)}
 
             <GameMenu open={openModal} onClose={closeMenu} endQuiz={endQuiz} />
 

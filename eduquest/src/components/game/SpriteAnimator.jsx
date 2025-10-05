@@ -61,6 +61,8 @@ const SpriteAnimator = forwardRef((props, ref) => {
       else if (currentAnimation == "dying" && prev === animations[currentAnimation].frameCount - 1) {
         setCurrentAnimation("dead")
         return 0;
+      } else if (currentAnimation == "dead") {
+        props.end()
       }
       
       return next;
