@@ -77,7 +77,18 @@ export const AuthContextProvider = ({children}) => {
         if (error) console.error('Login error:', error);
       };
 
-    return( <AuthContext.Provider value={{ session, oAuth }}>
+      const signOut = async () => {
+        setSession(null)
+        const { error } = await supabase.auth.signOut()
+
+        if (error) {
+          console.error('Error signing out:', error)
+        } else {
+          window.location.href = "/login" // or use React Router's navigate
+        }
+      }
+
+    return( <AuthContext.Provider value={{ session, oAuth, signOut }}>
                 {children}
             </AuthContext.Provider>
     )

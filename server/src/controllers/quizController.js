@@ -1,0 +1,83 @@
+import { Quiz } from "../models/Quiz.js";
+import { Question } from "../models/Question.js";
+import { createQuiz, listUserQuizzes, getQuizByUuid, insertQuestions, getQuestionsByQuizUuid } from "../services/supabaseService.js";
+import { generateQuestionsFromPdf } from "../services/geminiService.js";
+import { v4 as uuidv4 } from 'uuid';
+
+
+export const QuizController = {
+  async createQuiz(req, res, next) {
+    console.log('reached 1 createQuiz')
+    try {
+      console.log('req body',req.body)
+      const { title, comprehension_level, userId } = req.body;
+      // const file = pdf;
+      const pdf = req.file;
+      console.log('pdf:', pdf)
+      // const userId = req.user.id;
+      // expects title, comprehension level, file, and userID
+      // console.log('pdf: ',pdf)
+      if (!pdf) return res.status(400).json({ error: "PDF required" });
+      const quid = uuidv4();
+      const quizObj = new Quiz({ quiz_uuid: quid, user_id: userId, title: title, comprehension_level: comprehension_level });
+      console.log('quiz obj: ',quizObj)
+      const quiz = await createQuiz(quizObj);
+
+      const base64 = pdf.buffer.toString("base64");
+      console.log('reached 2 quiz')
+      const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
+      // console.log('question data: ',questionsData)
+      console.log('reached 3 quiz')
+      // Mmap AI-generated questions to separate options
+      const questionRows = questionsData.map(q => new Question({
+        quiz_id: quid,
+        question_text: q.question,
+        option_a: q.options[0],
+        option_b: q.options[1],
+        option_c: q.options[2],
+        option_d: q.options[3],
+        correct_option: q.correct
+      }));
+      console.log('questionRows: ',questionRows)
+      await insertQuestions(questionRows);
+      console.log('reached 5 quiz')
+      res.status(201).json({ quiz, questions: questionRows });
+    } catch (err) {
+      console.log('Errored out: ',err)
+      next(err);
+    }
+  },
+
+  async getQuiz(req, res, next) {
+    try {
+      const { quiz_uuid } = req.params;
+      console.log('received quiz id: ', quiz_uuid)
+      const quiz = await getQuizByUuid(quiz_uuid);
+      const questions = await getQuestionsByQuizUuid(quiz_uuid);
+      res.json({ quiz, questions });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async getQuizzes(req, res, next) {
+    console.log('reached aa')
+    try {
+      const { userId } = req.body
+      const quizzes = await listUserQuizzes(userId)
+      console.log('user quizzes: ',quizzes)
+      //get the question number
+      for (let i=0; i < quizzes.length; i++) {
+        const qid = quizzes[i].id
+        const quesions = await getQuestionsByQuizUuid(qid)
+        console.log('questions for a quiz: '), quesions
+        const numQuestions = quesions.length
+        quizzes[i].questions = numQuestions
+      }
+
+      res.json({ quizzes })
+    } catch (err) {
+      next(err)
+    }
+  }
+};

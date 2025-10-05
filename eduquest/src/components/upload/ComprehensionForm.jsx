@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import '../../styles/form.css'
 import { useForm } from 'react-hook-form';
-
+import { uploadNote } from '../../services/uploadServices';
+import { UserAuth } from '../../AuthContext'
 
 const ComprehensionForm = (props) => {
+    const { session } = UserAuth()
     const { register, handleSubmit } = useForm()
     const [comprehensionLevel, setComprehensionLevel] = useState('Kindergarten')
     const [loading, setLoading] = useState(false)
     const [submitSuccess, setSubmitSuccess] = useState(null)
+    const [title, setTitle] = useState('')
+    const [userId, setUserId] = useState(null)
+
+    useEffect(() => {
+        setUserId(session.user?.id)
+    },[session])
 
     const handleOverlayClick = (e) => {
         // Only close if the clicked element is the overlay itself
         if (e.target === e.currentTarget) {
+            setSubmitSuccess(null)
+            setTitle('')
             props.onClose();
         }
     };
@@ -20,7 +30,24 @@ const ComprehensionForm = (props) => {
         console.log('User is uploading pdf')
         if (props.file) {
             const formData = new FormData();
-            formData.append('file', props.file);
+            formData.append('pdf', props.file);
+            formData.append("title", title);
+            formData.append("comprehension_level", comprehensionLevel);
+            formData.append("userId", userId)
+            setLoading(true)
+            try {
+                const success = await uploadNote(formData)
+                if (success.success) {
+                    setSubmitSuccess('success')
+                } else {
+                    setSubmitSuccess('fail')
+                }
+            } catch (err) {
+                console.error('onsubmit',err)
+                setSubmitSuccess('fail')
+            } finally {
+                setLoading(false)
+            }
         }
     }
 
@@ -29,6 +56,12 @@ const ComprehensionForm = (props) => {
         console.log('The selected comprehension level: ',level)
         setComprehensionLevel(level)
     }
+    const handleTitleChange = (e) => {
+        const t = e.target.value
+        console.log('User entered title: ',t)
+        setTitle(t)
+    }
+
     if (!props.open) {
         return null
     } else {
@@ -37,8 +70,20 @@ const ComprehensionForm = (props) => {
             <>
                 <div className='overlay' onClick={handleOverlayClick}></div>
                 <form className='border border-[#ccc] bg-white w-2/3 md:w-1/2 lg:w-2/5 xl:w-1/3 2xl:w-1/4 flex flex-col items-center justify-center rounded-md modal' onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit(onSubmit)}>
-                    <div className='w-full flex items-center justify-end h-auto px-4 py-1 mb-10 mt-2'>
-                        <label className='font-semibold text-lg xl:text-xl cursor-pointer text-gray-700 hover:text-gray-500' onClick={()=>props.onClose()}>Cancel</label>
+                    <div className='w-full flex items-center justify-end h-auto px-4 py-1 mb-16 mt-2'>
+                        <label className='font-semibold text-lg xl:text-xl cursor-pointer text-gray-700 hover:text-gray-500' onClick={()=>{
+                            setSubmitSuccess(null)
+                            setTitle('')
+                            props.onClose()}
+                            }>Cancel</label>
+                    </div>
+                    <div className='w-10/12 px-2 mb-8 flex flex-col items-center justify-start'>
+                            <p className='font-medium text-base md:text-lg 2xl:text-xl'>File: <span className='font-medium'>{props.file.name}</span></p>
+                    </div>
+
+                    <div className='w-10/12 px-2 mb-8 flex flex-col items-center justify-start'>
+                        <label className='font-medium text-base md:text-lg 2xl:text-xl mb-2'>Quiz Title</label>
+                        <input className='px-3 py-2 rounded-lg font-medium text-base md:text-lg w-full border border-[#ccc] focus:outline-none' type='text' placeholder='Enter Quiz title' onChange={handleTitleChange}/>
                     </div>
 
                     <div className='w-10/12 px-2 mb-8 flex flex-col items-center justify-start'>
@@ -65,7 +110,7 @@ const ComprehensionForm = (props) => {
                         {!loading && submitSuccess != 'success' && (<input className='text-white w-full h-auto py-2 px-2 bg-gray-700 hover:bg-gray-500 transition-all duration-300 font-semibold text-lg xl:text-xl rounded-lg cursor-pointer shadow-sm' type='submit' value="Upload"/>)}
                         {!loading && submitSuccess == 'fail' && (<p className='text-red-800 mt-2'>Upload Failed</p>)}
                         {!loading && submitSuccess == 'success' && (<p className='text-green-500 mt-2'>Upload Successful!</p>)}
-                        {loading && (<img className='h-9 w-9' src='/spinner.svg' />)}
+                        {loading && (<div className='w-full h-auto py-2 px-2 bg-gray-700 hover:bg-gray-500 transition-all duration-300 rounded-lg cursor-pointer shadow-sm flex items-center justify-center'><img className='h-10 w-10' src='/spinner.svg' /></div>)}
                     </div>
                 </form>
             </>
