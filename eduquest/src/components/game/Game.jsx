@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import ChoiceCard from './ChoiceCard'
 import SpriteAnimator from './SpriteAnimator'
 import Header from '../Header'
@@ -10,6 +10,7 @@ import enemy_slash from '../../assets/sound/enemy_slash_sound.mp3'
 import bg_sound from '../../assets/sound/test.mp3'
 import { FaPause } from "react-icons/fa";
 import GameMenu from './GameMenu'
+import EndMenu from './EndMenu'
 import { UserAuth } from '../../AuthContext'
 
 import { getQuestions, submitResults } from '../../services/gameServices'
@@ -29,14 +30,17 @@ const Game = () => {
         width: window.innerWidth,
         height: window.innerHeight,
     });
-    const [openModal, setOpenModal] = useState(true)
+    const [openPauseModal, setOpenPauseModal] = useState(true)
+    const [openEndModal, setOpenEndModal] = useState(false)
     const [questions, setQuestions] = useState([])
     const [questionIndex, setQuestionInedx] = useState(0)
     const [correct, setCorrect] = useState(0)
     const [won, setWon] = useState(false)
     const [uploadingResults, setUploadingResults] = useState(false)
+    const [gameOver, setGameOver] = useState(false)
 
     const data = location.state;
+    const { quizId } = useParams()
     const userId = session.user?.id
     const audioHurtRef = useRef(null);
     const audioSlashRef = useRef(null)
@@ -44,7 +48,7 @@ const Game = () => {
 
     const results = {
         user_id: userId,
-        quiz_uuid: data?.quizId
+        quiz_uuid: quizId
     }
 
     const playHurtSound = () => {
@@ -56,7 +60,8 @@ const Game = () => {
     };
 
     const closeMenu = () => {
-        setOpenModal(false)
+        setOpenPauseModal(false)
+        setOpenEndModal(false)
     }
 
     const endQuiz = () => {
@@ -64,9 +69,19 @@ const Game = () => {
         navigate("/")
     }
 
+    const restartQuiz = () => {
+        setQuestionInedx(0)
+        setPlayerHealth(maxHealth)
+        setEnemyHealth(maxHealth)
+        setCorrect(0)
+        setWon(false)
+        setOpenEndModal(false)
+        navigate(`/game/${quizId}`)
+    }
+
     const fetchQuestions = async () => {
         try {
-            const res = await getQuestions(data?.quizId)
+            const res = await getQuestions(quizId)
             if(res) {
                 console.log('questions: ',res)
                 console.log('res: ',res.length)
@@ -144,31 +159,25 @@ const Game = () => {
     }
 
     useEffect(() => {
-        if (playerHealth == 0) {
+        if(!openEndModal) {
+            if (playerHealth == 0) {
             setUploadingResults(true)
             uploadResults()
-            endQuiz()
-        } else if (enemyHealth == 0) {
-            setWon(true)
-            handleAction('dying')
-            setUploadingResults(true)
-            uploadResults()
-        } else if (questionIndex < questions.length - 1) {
-            setQuestionInedx(questionIndex + 1)
-        } else if (questionIndex == questions.length - 1) {
-            setWon(correct/questions.length >= 5 ? true : false)
-            setUploadingResults(true)
-            uploadResults()
-            endQuiz()
+            setOpenEndModal(true)
+            } else if (enemyHealth == 0) {
+                setWon(true)
+                handleAction('dying')
+                setUploadingResults(true)
+                uploadResults()
+            } else if (questionIndex < questions.length - 1) {
+                setQuestionInedx(questionIndex + 1)
+            } else if (questionIndex == questions.length - 1) {
+                setWon(correct/questions.length >= 5 ? true : false)
+                setUploadingResults(true)
+                uploadResults()
+                setOpenEndModal(true)
+            }
         }
-        // else {
-        //     //got through all the questions
-        //     setWon(true)
-        //     handleAction('dying')
-        //     setUploadingResults(true)
-        //     uploadResults()
-        // }
-        console.log('question length: ', questions.length)
     },[playerHealth, enemyHealth])
 
 
@@ -177,9 +186,9 @@ const Game = () => {
             {/* <audio ref={audioRef} src="" loop /> */}
             <audio ref={audioHurtRef} src={enemy_hurt} />
             <audio ref={audioSlashRef} src={enemy_slash} />
-            {!openModal && <audio ref={audioBGRef} src={bg_sound} autoPlay loop/>}
-            {questions && (<div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
-                <h3 className='w-10/12 font-semibold text-base md:text-lg xl:text-xl text-center text-blue-500 mb-6'>{questions[questionIndex]?.question_text}</h3>
+            {!openPauseModal && <audio ref={audioBGRef} src={bg_sound} autoPlay loop/>}
+            {questions.length > 0 && (<div className='top-2 md:left-4 absolute h-auto w-11/12 md:w-2/3 lg:w-1/2 xl:w-1/3 border border-[#ccc] rounded-lg shadow-md bg-white px-2 py-4 flex flex-col items-center justify-center'>
+                <h3 className='w-10/12 font-semibold text-base md:text-lg xl:text-xl text-center text-blue-500 mb-6'>{questionIndex+1}. {questions[questionIndex]?.question_text}</h3>
                 {/* {
                     temp && temp.choices?.map((item,index) => {
                         return <ChoiceCard text={item.text} selected={selectedIndex === index ? true : false} click={() => {
@@ -209,10 +218,10 @@ const Game = () => {
             </div>)}
 
             <div className='h-auto w-11/12 flex items-center justify-center mb-24'>
-                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12} end={endQuiz}/>
+                <SpriteAnimator displayHeight={spriteDim} displayWidth={spriteDim} ref={bRef} fps={12} end={()=>setOpenEndModal(true)}/>
             </div>
 
-            <div className='absolute right-2 bottom-32 cursor-pointer rounded-md flex items-center justify-center z-10 h-auto xl:px-5 px-4 xl:py-5 py-4' onClick={()=>setOpenModal(true)} style={{backgroundImage: `url(${log})`, backgroundSize: 'cover'}}>
+            <div className='absolute right-2 bottom-32 cursor-pointer rounded-md flex items-center justify-center z-10 h-auto xl:px-5 px-4 xl:py-5 py-4' onClick={()=>setOpenPauseModal(true)} style={{backgroundImage: `url(${log})`, backgroundSize: 'cover'}}>
                 <FaPause size={40} color='white'/>
             </div>
 
@@ -220,9 +229,9 @@ const Game = () => {
                 <img className='h-20 w-20 xl:h-28 xl:w-28' src='/spinner.svg'/>
             </div>)}
 
-            {questions && (<div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-[#e3eaff] flex items-center justify-between border'>
+            {questions && (<div className='max-w-full w-full h-auto px-4 py-3 absolute bottom-0 bg-gradient-to-r from-[#2D3D73] via-indigo-600 to-purple-600 flex items-center justify-between border'>
                 <div className='w-1/2 flex flex-col items-start gap-2'>
-                    <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Player Health</h3>
+                    <h3 className='text-lg md:text-xl xl:text-2xl font-medium text-white'>Player Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2'>
                         <div className='absolute h-full w-full bg-red-700 rounded-md'></div>
                         <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tl-md rounded-bl-md transition-all duration-300 ${playerHealth == questions.length ? 'rounded-tr-md rounded-br-md' : ''}`} style={{width: `${(playerHealth / maxHealth) * 100}%`}}></div>
@@ -230,7 +239,7 @@ const Game = () => {
                 </div>
 
                 <div className='w-1/2 flex flex-col items-end gap-2'>
-                    <h3 className='text-lg md:text-xl xl:text-2xl font-medium'>Enemy Health</h3>
+                    <h3 className='text-lg md:text-xl xl:text-2xl font-medium text-white'>Enemy Health</h3>
                     <div className='h-9 md:h-10 xl:h-12 w-2/3 rounded-sm relative mb-2 flex justify-end'>
                         <div className='absolute h-full w-full bg-red-700 rounded-md'></div>
                         <div className={`absolute h-full w-full z-10 bg-green-400 rounded-tr-md rounded-br-md transition-all duration-300 ${enemyHealth == questions.length ? 'rounded-tl-md rounded-bl-md' : ''}`} style={{width: `${(enemyHealth / maxHealth) * 100}%`}}></div>
@@ -238,7 +247,8 @@ const Game = () => {
                 </div>
             </div>)}
 
-            <GameMenu open={openModal} onClose={closeMenu} endQuiz={endQuiz} />
+            <GameMenu open={openPauseModal} onClose={closeMenu} endQuiz={endQuiz} />
+            <EndMenu open={openEndModal} onClose={closeMenu} restartQuiz={restartQuiz} endQuiz={endQuiz} />
 
         </section>
     )

@@ -7,28 +7,28 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const QuizController = {
   async createQuiz(req, res, next) {
-    console.log('reached 1 createQuiz')
+    console.log('creating new quiz')
     try {
-      console.log('req body',req.body)
+      // console.log('req body',req.body)
       const { title, comprehension_level, userId } = req.body;
       // const file = pdf;
       const pdf = req.file;
-      console.log('pdf:', pdf)
+      // console.log('pdf:', pdf)
       // const userId = req.user.id;
       // expects title, comprehension level, file, and userID
       // console.log('pdf: ',pdf)
       if (!pdf) return res.status(400).json({ error: "PDF required" });
       const quid = uuidv4();
       const quizObj = new Quiz({ quiz_uuid: quid, user_id: userId, title: title, comprehension_level: comprehension_level });
-      console.log('quiz obj: ',quizObj)
+      // console.log('quiz obj: ',quizObj)
       const quiz = await createQuiz(quizObj);
 
       const base64 = pdf.buffer.toString("base64");
-      console.log('reached 2 quiz')
+      // console.log('reached 2 quiz')
       const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
       // console.log('question data: ',questionsData)
-      console.log('reached 3 quiz')
-      console.log('question data: ',questionsData)
+      // console.log('reached 3 quiz')
+      // console.log('question data: ',questionsData)
       // Mmap AI-generated questions to separate options
       const questionRows = questionsData.map(q => new Question({
         quiz_id: quid,
@@ -36,13 +36,12 @@ export const QuizController = {
         option_a: q.options[0] ? q.options[0] : q.options.A,
         option_b: q.options[1] ? q.options[1] : q.options.B,
         option_c: q.options[2] ? q.options[2] : q.options.C,
-        option_c: q.options[2] ? q.options[3] : q.options.D,
-        option_d: q.options[3] ,
+        option_d: q.options[3] ? q.options[3] : q.options.D,
         correct_option: q.correct
       }));
-      console.log('questionRows: ',questionRows)
+      // console.log('questionRows: ',questionRows)
       await insertQuestions(questionRows);
-      console.log('reached 5 quiz')
+      // console.log('reached 5 quiz')
       res.status(201).json({ quiz, questions: questionRows });
     } catch (err) {
       console.log('Errored out: ',err)
@@ -63,16 +62,16 @@ export const QuizController = {
   },
 
   async getQuizzes(req, res, next) {
-    console.log('reached aa')
+    // console.log('reached aa')
     try {
       const { userId } = req.body
       const quizzes = await listUserQuizzes(userId)
-      console.log('user quizzes: ',quizzes)
+      // console.log('user quizzes: ',quizzes)
       //get the question number
       for (let i=0; i < quizzes.length; i++) {
         const qid = quizzes[i].id
         const quesions = await getQuestionsByQuizUuid(qid)
-        console.log('questions for a quiz: '), quesions
+        // console.log('questions for a quiz: '), quesions
         const numQuestions = quesions.length
         quizzes[i].questions = numQuestions
       }

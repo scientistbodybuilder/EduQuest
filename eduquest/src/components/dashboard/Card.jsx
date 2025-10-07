@@ -6,7 +6,7 @@ const Card = (props) => {
 
     const openGame = (id) => {
             console.log('card clicked go to game')
-            navigate("/game", { state: { quizId: id} });
+            navigate(`/game/${id}`, { state: { quizId: id} });
     }
     return(
         <div onClick={()=>openGame(props.quizId)} className='border-2 border-[#94acf5] bg-white rounded-lg pb-2 w-72 h-44 xl:w-80 xl:h-48 max-w-full shadow-lg hover:shadow-2xl relative flex flex-col items-center justify-center cursor-pointer'>
