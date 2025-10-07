@@ -38,6 +38,7 @@ const Game = () => {
     const [won, setWon] = useState(false)
     const [uploadingResults, setUploadingResults] = useState(false)
     const [gameOver, setGameOver] = useState(false)
+    const [answerSubmitted, setAnswerSubmitted] = useState(false)
 
     const data = location.state;
     const { quizId } = useParams()
@@ -70,11 +71,11 @@ const Game = () => {
     }
 
     const restartQuiz = () => {
-        setQuestionInedx(0)
         setPlayerHealth(maxHealth)
         setEnemyHealth(maxHealth)
         setCorrect(0)
         setWon(false)
+        setQuestionInedx(0)
         setOpenEndModal(false)
         navigate(`/game/${quizId}`)
     }
@@ -144,6 +145,7 @@ const Game = () => {
 
     const Answer = () => {
         console.log('Student submitted an answer: ',selected)
+        setAnswerSubmitted(true)
         if (selected == questions[questionIndex].correct_option) {
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
             playHurtSound()
@@ -159,28 +161,32 @@ const Game = () => {
     }
 
     useEffect(() => {
-        if(!openEndModal) {
-            if (playerHealth == 0) {
+        if(openEndModal || !answerSubmitted) return
+
+        if (playerHealth == 0) {
+        setUploadingResults(true)
+        uploadResults()
+        setOpenEndModal(true)
+        } else if (enemyHealth == 0) {
+            setWon(true)
+            handleAction('dying')
+            setUploadingResults(true)
+            uploadResults()
+        } else if (questionIndex < questions.length - 1) {
+            console.log('increment questions')
+            console.log('old question index: ',questionIndex)
+            setQuestionInedx(questionIndex + 1)
+        } else if (questionIndex == questions.length - 1) {
+            setWon(correct/questions.length >= 5 ? true : false)
             setUploadingResults(true)
             uploadResults()
             setOpenEndModal(true)
-            } else if (enemyHealth == 0) {
-                setWon(true)
-                handleAction('dying')
-                setUploadingResults(true)
-                uploadResults()
-            } else if (questionIndex < questions.length - 1) {
-                setQuestionInedx(questionIndex + 1)
-            } else if (questionIndex == questions.length - 1) {
-                setWon(correct/questions.length >= 5 ? true : false)
-                setUploadingResults(true)
-                uploadResults()
-                setOpenEndModal(true)
-            }
         }
-    },[playerHealth, enemyHealth])
+        
+        setAnswerSubmitted(false)
+    },[playerHealth, enemyHealth, answerSubmitted])
 
-
+    console.log('questiosn index initial: ',questionIndex)
     return(
         <section className='w-full h-full flex flex-col items-center justify-end relative' style={{backgroundImage: `url(${bg})`, backgroundSize: 'cover'}}>
             {/* <audio ref={audioRef} src="" loop /> */}
