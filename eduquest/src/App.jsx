@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from "./utils/supabaseClient";
 import './App.css'
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import Login from './components/login/login'
+import Login from './components/login/Login'
 import Home from './components/dashboard/Home'
 import Game from './components/game/Game'
 import Upload from './components/upload/Upload'
