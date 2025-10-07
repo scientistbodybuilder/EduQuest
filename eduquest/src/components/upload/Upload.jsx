@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Header from '../Header'
 import { FaUpload } from "react-icons/fa";
 import ComprehensionForm from './ComprehensionForm';
+import Footer from '../Footer';
 
 
 const Upload = () => {
@@ -29,7 +30,7 @@ const Upload = () => {
     }
 
     return(
-        <div className='w-full h-full flex flex-col items-center justify-start bg-[#bcc8f1]'>
+        <div className='w-full h-full flex flex-col items-center justify-start bg-[#bcc8f1] pb-20'>
             <div className='mt-20 w-11/12 lg:w-10/12 flex flex-col items-center justify-start'>
                 <div className='w-full h-atuo'>
                     <h3 className='font-bold text-2xl md:text-3xl xl:text-4xl'>Upload a Document</h3>
@@ -37,7 +38,7 @@ const Upload = () => {
                 </div>
 
                 <div className='mt-24 w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 2xl:w-1/3 flex flex-col items-center justify-center h-auto'>
-                    <label className='border w-full h-120 rounded-lg border-gray-200 bg-gray-100 shadow-md flex justify-center items-center cursor-pointer'>
+                    <label className='border w-full h-120 rounded-lg border-gray-300 bg-gray-200 hover:bg-gray-50 shadow-md flex justify-center items-center cursor-pointer'>
                         <FaUpload color='gray' size={80}/>
                         <input type='file' onChange={handleFileChange} className='hidden' />
                     </label>
@@ -57,9 +58,10 @@ const Upload = () => {
 
 const UploadExport = () => {
     return(
-        <div className='w-full h-full flex flex-col items-center justify-start'>
+        <div className='w-full h-full flex flex-col items-center justify-start overflow-x-hidden'>
             <Header />
             <Upload />
+            <Footer />
         </div>
     )
 }

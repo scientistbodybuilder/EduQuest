@@ -3,7 +3,9 @@ import { ai } from "../config/geminiClient.js";
 export async function generateQuestionsFromPdf(base64Pdf, comprehensionLevel) {
     const prompt = `Generate multiple-choice questions from this PDF.
                     Comprehension level: ${comprehensionLevel}.
-                    Return JSON array of {question, options, correct}.`;
+                    Return JSON array of {question, options, correct}. 
+                    Strictly limit the 'correct' json field to one uppercase character.
+                    Strictly include the options as an array.`;
 
     const contents = [
         {
@@ -21,14 +23,16 @@ export async function generateQuestionsFromPdf(base64Pdf, comprehensionLevel) {
     });
 
     const textContent = response.candidates[0].content.parts[0].text;
-    
+    // console.log('textContent: ', textContent)
     try {
         const cleanText = textContent
             .replace(/```json\n?/g, '')
             .replace(/```\n?/g, '')
             .trim();
-        
+        // console.log('cleaned text: ',cleanText)
+
         const questions = JSON.parse(cleanText);
+        // console.log('parsed questions: ',questions)
         return questions;
     } catch (e) {
         console.error("Failed to parse questions:", e);

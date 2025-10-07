@@ -28,14 +28,16 @@ export const QuizController = {
       const questionsData = await generateQuestionsFromPdf(base64, comprehension_level);
       // console.log('question data: ',questionsData)
       console.log('reached 3 quiz')
+      console.log('question data: ',questionsData)
       // Mmap AI-generated questions to separate options
       const questionRows = questionsData.map(q => new Question({
         quiz_id: quid,
         question_text: q.question,
-        option_a: q.options[0],
-        option_b: q.options[1],
-        option_c: q.options[2],
-        option_d: q.options[3],
+        option_a: q.options[0] ? q.options[0] : q.options.A,
+        option_b: q.options[1] ? q.options[1] : q.options.B,
+        option_c: q.options[2] ? q.options[2] : q.options.C,
+        option_c: q.options[2] ? q.options[3] : q.options.D,
+        option_d: q.options[3] ,
         correct_option: q.correct
       }));
       console.log('questionRows: ',questionRows)

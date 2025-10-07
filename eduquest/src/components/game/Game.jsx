@@ -68,6 +68,7 @@ const Game = () => {
         try {
             const res = await getQuestions(data?.quizId)
             if(res) {
+                console.log('questions: ',res)
                 console.log('res: ',res.length)
                 setQuestions(res)
                 setPlayerHealth(res?.length)
@@ -128,7 +129,7 @@ const Game = () => {
 
     const Answer = () => {
         console.log('Student submitted an answer: ',selected)
-        if (1 == 1) {
+        if (selected == questions[questionIndex].correct_option) {
             setEnemyHealth(Math.max(enemyHealth - attackPoints,0))
             playHurtSound()
             handleAction('hurt')
@@ -138,7 +139,8 @@ const Game = () => {
             playSlashSound()
             handleAction('attack')
         }
-        
+        setSelected(null)
+        setSelectedIndex(null)
     }
 
     useEffect(() => {
