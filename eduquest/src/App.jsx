@@ -36,7 +36,7 @@ function App() {
       <div className='h-screen w-screen m-0 p-0 flex flex-col'>
       <Routes>
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/game" element={<ProtectedRoute><Game /></ProtectedRoute>} />
+          <Route path="/game/:quizId" element={<ProtectedRoute><Game /></ProtectedRoute>} />
           <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
           <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
