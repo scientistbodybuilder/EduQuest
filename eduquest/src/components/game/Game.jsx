@@ -68,6 +68,7 @@ const Game = () => {
         try {
             const res = await getQuestions(data?.quizId)
             if(res) {
+                console.log('questions: ',res)
                 console.log('res: ',res.length)
                 setQuestions(res)
                 setPlayerHealth(res?.length)
@@ -138,7 +139,8 @@ const Game = () => {
             playSlashSound()
             handleAction('attack')
         }
-        
+        setSelected(null)
+        setSelectedIndex(null)
     }
 
     useEffect(() => {

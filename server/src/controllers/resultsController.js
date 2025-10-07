@@ -1,5 +1,7 @@
+import { supabase } from "../config/supabaseClient.js";
 import { Result } from "../models/Result.js";
-import { insertResult, getResultsByQuizUuid } from "../services/supabaseService.js";
+import resultRouter from "../routes/resultsRoutes.js";
+import { insertResult, getResultsByQuizUuid, listUserQuizzes } from "../services/supabaseService.js";
 
 export const ResultController = {
   async saveResult(req, res, next) {
@@ -25,6 +27,38 @@ export const ResultController = {
       res.json({ results });
     } catch (err) {
       next(err);
+    }
+  },
+  
+  async getAllResults(req, res, next) {
+    // console.log('reached get all results')
+    try {
+      const { userId } = req.body
+      const quizzes = await listUserQuizzes(userId)
+      // console.log('quizzes: ',quizzes)
+      let resultsList = []
+      for (let i=0; i < quizzes.length; i++) {
+        const quizUid = quizzes[i].id
+        const quizName = quizzes[i].title
+        console.log('2')
+        const quizRes = await getResultsByQuizUuid(quizUid)
+        // console.log('quizRes: ', quizRes)
+        let quizList = []
+        for (let j=0; j < quizRes.length; j++ ) {
+          quizRes[j].quiz_name = quizName
+          quizRes[j].date = quizRes[j].created_at.split('T')[0]
+          const { quiz_name, score, won, date, id } = quizRes[j]
+          const finalRes = { quiz_name, score, won, date, id }
+          quizList.push(finalRes)
+        }
+        
+        resultsList = [...resultsList, ...quizList]
+      }
+      // console.log('results list: ', resultsList)
+
+      res.json({ resultsList })
+    } catch (err) {
+      next(err)
     }
   }
 };
