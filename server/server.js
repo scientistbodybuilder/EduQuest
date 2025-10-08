@@ -13,7 +13,7 @@ const app = express()
 
 app.use(express.json())
 app.use(cors({
-  origin: '*',
+  origin: ['edu-quest-ten.vercel.app','http://localhost:5173']
 }));
 
 
