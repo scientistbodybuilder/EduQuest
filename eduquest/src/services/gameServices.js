@@ -1,8 +1,9 @@
 import axios from "axios"
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000'
 
 export const getQuestions = async (quizId) => {
     try {
-        const response = await axios.get(`http://localhost:4000/api/questions/${quizId}`)
+        const response = await axios.get(`${API_URL}/api/questions/${quizId}`)
         if (response.status >= 200 && response.status < 300) {
             console.log('successfully got questions: ',response.data.questions)
             return response.data.questions
@@ -15,7 +16,7 @@ export const getQuestions = async (quizId) => {
 
 export const submitResults = async (data) => {
     try {
-        const response = await axios.post('http://localhost:4000/api/results/save', data)
+        const response = await axios.post(`${API_URL}/api/results/save`, data)
         if (response.status >= 200 && response.status < 300) {
             console.log('results submitted')
             return { success: true }

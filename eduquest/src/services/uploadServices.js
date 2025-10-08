@@ -1,8 +1,9 @@
 import axios from "axios"
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000'
 
 export const uploadNote = async (data) => {
     try {
-        const response = await axios.post('http://localhost:4000/api/create', data, {
+        const response = await axios.post(`${API_URL}/api/create`, data, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
