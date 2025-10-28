@@ -5,7 +5,7 @@ const SpriteAnimator = forwardRef((props, ref) => {
   const animations = {
     idle: {
       src: "/enemy_idle_sheet.png",
-      frameCount: 8,
+      frameCount: 18,
     },
     hurt: {
       src: "/enemy_hurt_sheet.png",
